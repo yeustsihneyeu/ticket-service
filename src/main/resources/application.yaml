@@ -1,0 +1,32 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: ticket-service
+
+  cloud:
+    consul:
+      port: 9091
+      host: localhost
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ticket
+    username: eventuate
+    password: eventuate
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    password: eventuate
+    user: eventuate
+    url: jdbc:postgresql://localhost:5433/ticket
+    change-log: classpath:/db/master.yaml
+    default-schema: eventuate
+
+eventuatelocal:
+  kafka:
+    bootstrap:
+      servers: http://localhost:9092
+  zookeeper:
+    connection:
+      string: http://localhost:2181
