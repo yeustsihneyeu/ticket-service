@@ -1,11 +1,13 @@
 package yesustihneyeu.microservice.ticket;
 
+import io.eventuate.tram.events.publisher.DomainEventPublisher;
+import io.eventuate.tram.events.publisher.ResultWithEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -13,11 +15,18 @@ import javax.persistence.EntityNotFoundException;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
     public void create(String actionId, String actionName) {
         log.info("create Ticket actionId - {}", actionId);
-        TicketEntity ticket = TicketEntity.create(actionId, actionName);
-        ticketRepository.save(ticket);
+        ResultWithEvents<TicketEntity> result = TicketEntity.create(actionId, actionName);
+        TicketEntity ticket = ticketRepository.save(result.result);
+        domainEventPublisher.publish(
+                TicketEntity.class.getName(),
+                ticket.getId(),
+                Map.of("spring.json.type.mapping", "createTicket"),
+                result.events
+        );
     }
 
 
